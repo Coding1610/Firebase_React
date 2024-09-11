@@ -9,7 +9,7 @@ export default function App() {
   const putData = () => {
     console.log("Working")
     set(ref(db,'users/yash'),{
-      id:13,
+      id:1,
       name:"Yash Prajapati",
       age:19,
     });
@@ -17,8 +17,9 @@ export default function App() {
 
   return (
     <>
-    <div>Firebase React</div>
-    <button onClick={putData} className='bg-yellow-400 p-3 m-10'>PUT DATA</button>
+    <div className='w-screen h-screen flex justify-center items-center'>
+      <button onClick={putData} className='bg-yellow-400 p-5 font-bold'>PUT DATA</button>
+    </div>
     </>
   )
 }
