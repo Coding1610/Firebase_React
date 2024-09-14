@@ -1,6 +1,6 @@
 import {initializeApp} from 'firebase/app'
-import { createContext , useContext } from 'react';
-import { getAuth , createUserWithEmailAndPassword , GoogleAuthProvider , signInWithPopup , GithubAuthProvider } from 'firebase/auth'
+import { createContext , useContext, useState } from 'react';
+import { getAuth , createUserWithEmailAndPassword , GoogleAuthProvider , signInWithPopup , GithubAuthProvider , signOut , onAuthStateChanged } from 'firebase/auth'
 import { getDatabase , set , ref } from 'firebase/database'
 
 const FirebaseContext = createContext(null);
@@ -15,7 +15,7 @@ const firebaseConfig = {
     measurementId: "G-8KFQJ35J6D",
     databaseURL: "https://fir-project-2-b30ea-default-rtdb.firebaseio.com"
 };
-
+ 
 // App Instance
 const firebaseApp = initializeApp(firebaseConfig);
 
@@ -37,6 +37,8 @@ export const useFirebaseContext = () => useContext(FirebaseContext);
 // Provider
 export const FirebaseProvider = (props) => {
 
+    const [users,setUsers] = useState(null);
+
     // Sign Up With Google
     const signUpWithGoogle = () => {
         return signInWithPopup(firebaseAuth,googleProvider).then((value) => alert("Success Google Sign Up")).catch((error) => alert("Error"));
@@ -47,7 +49,6 @@ export const FirebaseProvider = (props) => {
         return signInWithPopup( firebaseAuth , githubProvider ).then((value) => alert("Success Github Sign Up")).catch((error) => alert("Error"));
     }
 
-
     // Put Data Function
     const putData = (key,data) => set(ref(firebaseDatabase,key),data);
 
@@ -55,11 +56,52 @@ export const FirebaseProvider = (props) => {
     const signUp = (email,password) => {
         return createUserWithEmailAndPassword(firebaseAuth,email,password).then((value) => alert("Success Gmail Sign Up")).catch((error) => alert("Error"));
     }
-    
+
+    // Logout Function
+    const logOut = () => {
+        // console.log("Working");
+        onAuthStateChanged( firebaseAuth , (user) => {
+            if( user === null ){
+                setUsers(null);
+            }
+            else{
+                setUsers(user);
+            }
+        });
+    }
+
+    // console.log("Hello User");
+
+    if( users === null ){
+
+        return (
+            <FirebaseContext.Provider value={{signUp,putData,signUpWithGoogle,signUpWithGithub,logOut}}>
+                {props.children}
+            </FirebaseContext.Provider>
+        )
+
+    }
+
+    // console.log(users);
+
     return (
-        <FirebaseContext.Provider value={{signUp,putData,signUpWithGoogle,signUpWithGithub}}>
-            {props.children}
-        </FirebaseContext.Provider>
+        <>
+        <div className='flex flex-col justify-center items-center gap-4 h-screen w-screen'>
+            <h1>Hello <span className='text-xl font-semibold'>{users.displayName} : {users.email} </span> </h1>
+            <button
+                onClick={ () => signOut(firebaseAuth) }
+				className="bg-black hover:bg-slate-900 text-white p-3 flex gap-2"
+				>
+				{" "}
+				Logout {" "}
+				<img
+					className="w-[27px]"
+					src="./src/logout_icon.png"
+					alt="logout_logo"
+				/>
+				</button>
+        </div>
+        </>
     )
 
 }
