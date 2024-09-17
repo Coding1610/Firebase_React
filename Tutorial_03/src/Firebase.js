@@ -6,7 +6,8 @@ const firebaseConfig = {
     projectId: "fir-project-3-b5d90",
     storageBucket: "fir-project-3-b5d90.appspot.com",
     messagingSenderId: "633083218597",
-    appId: "1:633083218597:web:4ae5da48660972d809db4c"
+    appId: "1:633083218597:web:4ae5da48660972d809db4c",
+    databaseURL : "https://fir-project-3-b5d90-default-rtdb.firebaseio.com/"
 };
 
 export const app = initializeApp(firebaseConfig);

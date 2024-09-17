@@ -1,11 +1,15 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useState } from 'react'
 import { app } from './firebase'
-import { getFirestore , collection , addDoc , doc , getDoc, query , where , getDocs , limit , updateDoc , deleteField , deleteDoc} from 'firebase/firestore'
+import { getDatabase , set , ref , get , child , onValue } from 'firebase/database'
+import { getFirestore , collection , addDoc , doc , getDoc, query , where , getDocs , limit , updateDoc , deleteField , deleteDoc, snapshotEqual} from 'firebase/firestore'
 
 // Firestore Instance
 const firestore = getFirestore(app);
 
 export default function App(){
+
+  const [name,setName] = useState("");
 
   // Make Collection
   const writeData = async () => {
@@ -67,19 +71,64 @@ export default function App(){
     });
   };
 
+  // Database Instance
+  const firebaseDB = getDatabase(app);
+
+  // Set Data
+  const setData = () => {
+    set(ref(firebaseDB,"DSA/Vector"),{
+      Type:"Dynamic"
+    });
+  };
+
+  // Get Data
+  const getData = () => {
+    get(child(ref(firebaseDB) ,"User/Name/Car"))
+      .then( (snap) => {
+        if( snap.exists() ){
+          console.log( snap.val());
+        }
+        else{
+          console.log("Data is not avilabel");
+        }
+      }).catch( (error) => {
+        console.log(error);
+      });
+  };
+
+  // onValue Function is Trigger when value is change : Realltime DB
+  useEffect( () => {
+    onValue(ref(firebaseDB,"User/Person1/Car") , (snapshot) => {
+      setName( snapshot.val() );
+    });
+  },[]);
+
   return (
     <>
-    <div className='flex flex-col gap-4 w-screen h-screen justify-center items-center'>
-      <h1 className='text-xl'> Firease : Cloud Firestore</h1>
-      <div className='flex gap-3 flex-wrap justify-center items-center'>
-        <button onClick={writeData} className='bg-black text-white p-3 hover:bg-slate-900'> make Collection </button>
-        <button onClick={writeSubData} className= 'border p-3 hover:bg-slate-100'> make subCollection </button>
-        <button onClick={readData} className='bg-black text-white p-3 hover:bg-slate-900'> get Data Using DocID </button>
-        <button onClick={readDataUsingQuery} className='border p-3 hover:bg-slate-100'> get Data Using Query </button>
-        <button onClick={updateData} className='bg-black text-white p-3 hover:bg-slate-900'> update Data </button>
-        <button onClick={deleteDocument} className='border p-3 hover:bg-slate-100'> Delete Document </button>
-        <button onClick={deleteDocumentField} className='bg-black text-white p-3 hover:bg-slate-900'> Delete Document Field</button>
+    <div className='flex w-screen h-screen flex-col justify-center items-center gap-5'>
+
+      <div className='flex flex-col gap-4 w-screen h-screen justify-center items-center'>
+        <h1 className='text-xl'> Firease : Cloud Firestore</h1>
+        <div className='flex gap-3 flex-wrap justify-center items-center'>
+          <button onClick={writeData} className='bg-black text-white p-3 hover:bg-slate-900'> make Collection </button>
+          <button onClick={writeSubData} className= 'border p-3 hover:bg-slate-100'> make subCollection </button>
+          <button onClick={readData} className='bg-black text-white p-3 hover:bg-slate-900'> get Data Using DocID </button>
+          <button onClick={readDataUsingQuery} className='border p-3 hover:bg-slate-100'> get Data Using Query </button>
+          <button onClick={updateData} className='bg-black text-white p-3 hover:bg-slate-900'> update Data </button>
+          <button onClick={deleteDocument} className='border p-3 hover:bg-slate-100'> Delete Document </button>
+          <button onClick={deleteDocumentField} className='bg-black text-white p-3 hover:bg-slate-900'> Delete Document Field</button>
+          </div>
+      </div>
+
+      <div className='flex flex-col gap-4 w-screen h-screen justify-center items-center'>
+        <h1 className='text-xl'> Firease : Realtime Database </h1>
+        <div className='flex gap-3 flex-wrap justify-center items-center'>
+          <button onClick={setData} className='bg-black text-white p-3 hover:bg-slate-900'> set Data </button>
+          <button onClick={getData} className= 'border p-3 hover:bg-slate-100'> get Data </button>
         </div>
+        <h1> Car : {name} </h1>
+      </div>
+
     </div>
     </>
   )
